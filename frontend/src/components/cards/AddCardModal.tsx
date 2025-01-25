@@ -87,7 +87,7 @@ export const AddCardModal = ({ isOpen, onClose, onAdd }: AddCardModalProps) => {
             Initial Balance
           </label>
           <div className="relative mt-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2  dark:text-gray-400">
               $
             </span>
             <input
@@ -117,7 +117,7 @@ export const AddCardModal = ({ isOpen, onClose, onAdd }: AddCardModalProps) => {
           />
         </div>
 
-        <div className="mt-2 text-sm text-gray-500">
+        <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           <p>A card number will be automatically generated upon submission.</p>
         </div>
 

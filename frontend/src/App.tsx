@@ -10,35 +10,40 @@ import { Cards } from "./pages/dashboard/Cards";
 import { Users } from "./pages/dashboard/Users";
 import { Analytics } from "./pages/dashboard/Analytics";
 import { Settings } from "./pages/dashboard/Settings";
+import { Profile } from "./pages/dashboard/Profile";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
   return (
     <>
-      <Toaster position="top-right" />
+      <ThemeProvider>
+        <Toaster position="top-right" />
 
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            {" "}
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="cards" element={<Cards />} />
-            <Route path="users" element={<Users />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-        </Routes>
-      </Router>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              {" "}
+              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="cards" element={<Cards />} />
+              <Route path="users" element={<Users />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </Router>
+      </ThemeProvider>
     </>
   );
 }

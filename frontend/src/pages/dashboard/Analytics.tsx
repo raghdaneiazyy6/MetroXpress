@@ -59,24 +59,43 @@ const Controls = ({
       <div className="flex flex-wrap gap-4 items-center">
         <div className="flex items-center space-x-4 flex-wrap gap-y-2">
           <select
-            className="rounded-md border border-gray-300 px-3 py-1.5 min-w-[120px]"
+            className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 min-w-[120px] bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400"
             value={chartType}
             onChange={(e) => setChartType(e.target.value as ChartType)}
           >
-            <option value="line">Line Chart</option>
-            <option value="bar">Bar Chart</option>
-            <option value="area">Area Chart</option>
-            <option value="pie">Pie Chart</option>
+            <option value="line" className="bg-white dark:bg-dark-bg-secondary">
+              Line Chart
+            </option>
+            <option value="bar" className="bg-white dark:bg-dark-bg-secondary">
+              Bar Chart
+            </option>
+            <option value="area" className="bg-white dark:bg-dark-bg-secondary">
+              Area Chart
+            </option>
+            <option value="pie" className="bg-white dark:bg-dark-bg-secondary">
+              Pie Chart
+            </option>
           </select>
           <select
-            className="rounded-md border border-gray-300 px-3 py-1.5 min-w-[120px]"
+            className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 min-w-[120px] bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as TimeRange)}
           >
-            <option value="day">Last 24 Hours</option>
-            <option value="week">Last Week</option>
-            <option value="month">Last Month</option>
-            <option value="year">Last Year</option>
+            <option value="day" className="bg-white dark:bg-dark-bg-secondary">
+              Last 24 Hours
+            </option>
+            <option value="week" className="bg-white dark:bg-dark-bg-secondary">
+              Last Week
+            </option>
+            <option
+              value="month"
+              className="bg-white dark:bg-dark-bg-secondary"
+            >
+              Last Month
+            </option>
+            <option value="year" className="bg-white dark:bg-dark-bg-secondary">
+              Last Year
+            </option>
           </select>
         </div>
       </div>
@@ -111,7 +130,7 @@ export const Analytics = ({
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-full">
-          <span className="text-gray-500">Loading...</span>
+          <span className="text-gray-500 dark:text-gray-400">Loading...</span>
         </div>
       );
     }
@@ -205,10 +224,12 @@ export const Analytics = ({
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Analytics & Reports
           </h2>
-          <p className="text-gray-500">View and analyze system performance</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            View and analyze system performance
+          </p>
         </div>
         <ExportButton
           data={chartData}

@@ -154,10 +154,20 @@ export const Cards = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">RFID Cards</h1>
-          <p className="text-gray-500">Manage all RFID cards in the system</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            RFID Cards
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Manage all RFID cards in the system
+          </p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>Add New Card</Button>
+        <Button
+          onClick={() => setShowAddModal(true)}
+          className="flex flex-row-reverse items-center"
+        >
+          Add New Card
+          <PlusIcon className="h-4 w-4 mr-2" />
+        </Button>
       </div>
 
       {/* Filters and Search */}
@@ -168,23 +178,43 @@ export const Cards = () => {
               <input
                 type="text"
                 placeholder="Search cards..."
-                className="pl-10 pr-4 py-2 border rounded-lg"
+                className="pl-10 pr-4 py-2 border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
             </div>
             <select
-              className="border rounded-lg px-4 py-2"
+              className="border rounded-lg px-4 py-2 bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400"
               value={filterStatus}
               onChange={(e) =>
                 setFilterStatus(e.target.value as Card["status"] | "all")
               }
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="blocked">Blocked</option>
+              <option
+                value="all"
+                className="bg-white dark:bg-dark-bg-secondary"
+              >
+                All Status
+              </option>
+              <option
+                value="active"
+                className="bg-white dark:bg-dark-bg-secondary"
+              >
+                Active
+              </option>
+              <option
+                value="inactive"
+                className="bg-white dark:bg-dark-bg-secondary"
+              >
+                Inactive
+              </option>
+              <option
+                value="blocked"
+                className="bg-white dark:bg-dark-bg-secondary"
+              >
+                Blocked
+              </option>
             </select>
           </div>
         </div>
@@ -196,20 +226,25 @@ export const Cards = () => {
           <TableHeader>
             <TableRow>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer dark:text-primary-400"
                 onClick={() => handleSort("cardNumber")}
               >
                 <div className="flex items-center space-x-2">
+                  <CreditCardIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   <span>Card Number</span>
                   <ArrowsUpDownIcon className="w-4 h-4" />
                 </div>
               </TableHead>
-              <TableHead>Balance</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Issue Date</TableHead>
-              <TableHead>Expiry Date</TableHead>
-              <TableHead>Last Used</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="dark:text-primary-400">Balance</TableHead>
+              <TableHead className="dark:text-primary-400">Status</TableHead>
+              <TableHead className="dark:text-primary-400">
+                Issue Date
+              </TableHead>
+              <TableHead className="dark:text-primary-400">
+                Expiry Date
+              </TableHead>
+              <TableHead className="dark:text-primary-400">Last Used</TableHead>
+              <TableHead className="dark:text-primary-400">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -303,7 +338,7 @@ export const Cards = () => {
             {selectedCard?.status === "blocked" ? "unblock" : "block"} this
             card?
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {selectedCard?.status === "blocked"
               ? "This will allow the card to be used for transactions again."
               : "This action will prevent the card from being used in any transactions."}

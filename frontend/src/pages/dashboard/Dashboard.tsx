@@ -59,11 +59,14 @@ export const Dashboard = () => {
     <div className="space-y-6 p-6">
       {/* Welcome Section */}
       <Card className="p-4">
-        <h1 className="text-xl font-bold text-gray-900">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           Welcome back,{" "}
-          <span className="text-primary-800">{user?.name || "User"}</span>!
+          <span className="text-primary-800 dark:text-primary-400">
+            {user?.name || "User"}
+          </span>
+          !
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm  dark:text-gray-400">
           Here's what's happening with your transport system today.
         </p>
       </Card>
@@ -79,11 +82,11 @@ export const Dashboard = () => {
             <Card className="p-3">
               <div className="flex items-center">
                 <div className="flex-1">
-                  <h3 className="text-xs font-medium text-gray-500">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-primary-400">
                     {stat.title}
                   </h3>
                   <div className="flex items-baseline">
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
                       {stat.value}
                     </p>
                     <p
@@ -92,14 +95,14 @@ export const Dashboard = () => {
                           ? "text-green-600"
                           : stat.changeType === "decrease"
                           ? "text-red-600"
-                          : "text-gray-500"
+                          : "text-gray-500 dark:text-gray-400"
                       }`}
                     >
                       {stat.change}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-50">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-50  ">
                   <stat.icon className="w-4 h-4 text-primary-600" />
                 </div>
               </div>

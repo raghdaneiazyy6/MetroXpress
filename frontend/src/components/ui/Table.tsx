@@ -34,7 +34,7 @@ export const TableRow = ({
 }: HTMLAttributes<HTMLTableRowElement>) => (
   <tr
     className={clsx(
-      "border-b transition-colors hover:bg-gray-50/50",
+      "border-b transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-700/50",
       className
     )}
     {...props}
@@ -47,7 +47,7 @@ export const TableHead = ({
 }: HTMLAttributes<HTMLTableCellElement>) => (
   <th
     className={clsx(
-      "h-12 px-4 text-left align-middle font-medium text-gray-500 [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left align-middle font-medium text-gray-500 dark:text-gray-400 [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}

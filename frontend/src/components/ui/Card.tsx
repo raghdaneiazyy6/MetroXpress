@@ -9,7 +9,10 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export const Card = ({ children, className, ...props }: CardProps) => {
   return (
     <div
-      className={clsx("bg-white rounded-lg shadow-sm", className)}
+      className={clsx(
+        "bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm",
+        className
+      )}
       {...props}
     >
       {children}

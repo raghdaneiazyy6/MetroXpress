@@ -1,7 +1,7 @@
 // src/services/api.ts
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000/api"; // Change this to your actual API URL
+const BASE_URL = "http://localhost:3000/api";
 
 export const api = axios.create({
   baseURL: BASE_URL,

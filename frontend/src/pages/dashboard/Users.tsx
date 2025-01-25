@@ -1,6 +1,6 @@
+// src/pages/dashboard/Users.tsx
 import { Button } from "../../components/ui/Button";
 
-// src/pages/dashboard/Users.tsx
 export const Users = () => {
   return (
     <div className="space-y-6 p-6">
@@ -13,7 +13,7 @@ export const Users = () => {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">System Users</h3>
           {/* Add user list/table here */}
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             User management interface coming soon...
           </p>
         </div>

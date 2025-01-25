@@ -16,15 +16,15 @@ interface StatusItemProps {
 
 const StatusItem = ({ label, value, status = "neutral" }: StatusItemProps) => {
   const statusColors = {
-    success: "text-green-500",
-    warning: "text-yellow-500",
-    error: "text-red-500",
-    neutral: "text-gray-500",
+    success: "text-green-500 dark:text-green-400",
+    warning: "text-yellow-500 dark:text-yellow-400",
+    error: "text-red-500 dark:text-red-400",
+    neutral: "text-gray-500 dark:text-gray-400",
   };
 
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-gray-600">{label}</span>
+      <span className="text-gray-600 dark:text-gray-300">{label}</span>
       <span className={statusColors[status]}>{value}</span>
     </div>
   );
@@ -43,15 +43,17 @@ export const SystemStatus = ({ collapsed, onToggle }: SystemStatusProps) => {
   return (
     <motion.div
       animate={{ height: collapsed ? "auto" : "auto" }}
-      className="bg-white rounded-lg shadow-sm overflow-hidden"
+      className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm overflow-hidden"
     >
       <div
-        className="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50 transition-colors"
+        className="p-4 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
         onClick={onToggle}
       >
-        <h2 className="text-lg font-medium text-gray-900">System Status</h2>
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+          System Status
+        </h2>
         <ChevronDownIcon
-          className={`w-5 h-5 transform transition-transform duration-200 text-gray-500 ${
+          className={`w-5 h-5 transform transition-transform duration-200 text-gray-500 dark:text-gray-400 ${
             collapsed ? "rotate-180" : ""
           }`}
         />

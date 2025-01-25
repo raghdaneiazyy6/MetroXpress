@@ -1,7 +1,7 @@
 // src/store/slices/authSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "../../services/api";
-import { AuthState } from "../../types/auth";
+import { AuthState, User } from "../../types/auth";
 import { mockLogin } from "../../mocks/usersData";
 
 const token = localStorage.getItem("token");
@@ -28,6 +28,33 @@ export const login = createAsyncThunk(
       return response;
     } catch (error: any) {
       return rejectWithValue(error.message || "Login failed");
+    }
+  }
+);
+
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (userData: Partial<User>, { rejectWithValue }) => {
+    try {
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const currentUser = localStorage.getItem("user");
+      if (!currentUser) {
+        throw new Error("No user found");
+      }
+
+      const updatedUser = {
+        ...JSON.parse(currentUser),
+        ...userData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Update localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return updatedUser;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to update profile");
     }
   }
 );
@@ -100,6 +127,18 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

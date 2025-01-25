@@ -20,11 +20,9 @@ export const Button = ({
       className={clsx(
         "rounded-md font-medium transition-colors",
         {
-          "bg-primary-600 text-white hover:bg-primary-700":
-            variant === "primary",
-          "bg-gray-200 text-gray-800 hover:bg-gray-300":
-            variant === "secondary",
-          "border-2 border-primary-600 text-primary-600 hover:bg-primary-50":
+          "button-primary": variant === "primary",
+          "button-secondary": variant === "secondary",
+          "border-2 border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-dark-bg-tertiary":
             variant === "outline",
         },
         {
