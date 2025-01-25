@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/Button";
 // src/pages/dashboard/Settings.tsx
 export const Settings = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">System Settings</h2>
         <Button>Save Changes</Button>

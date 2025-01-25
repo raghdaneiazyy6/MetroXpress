@@ -22,30 +22,6 @@ interface ViewCardModalProps {
   onUpdate: (updatedCard: Card) => void;
 }
 
-// Sample transactions (in real app, this would come from API)
-const sampleTransactions: Transaction[] = [
-  {
-    id: "1",
-    cardId: "1",
-    amount: 2.5,
-    type: "entry",
-    station: "Central Station",
-    timestamp: new Date().toISOString(),
-    status: "completed",
-    balance: 47.5,
-  },
-  {
-    id: "2",
-    cardId: "1",
-    amount: 50.0,
-    type: "topup",
-    station: "Online",
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    balance: 50.0,
-  },
-];
-
 const TransactionItem = ({ transaction }: { transaction: Transaction }) => {
   const getTransactionColor = (type: Transaction["type"]) => {
     switch (type) {
@@ -121,7 +97,6 @@ export const ViewCardModal = ({
   onUpdate,
 }: ViewCardModalProps) => {
   const [showTopUp, setShowTopUp] = useState(false);
-  const [transactions, setTransactions] = useState(sampleTransactions);
   const [transactionFilter, setTransactionFilter] = useState("all");
 
   const handleTopUp = (amount: number) => {
@@ -137,10 +112,7 @@ export const ViewCardModal = ({
       balance: newBalance,
     };
 
-    // Update transactions
-    setTransactions([newTransaction, ...transactions]);
-
-    // Update card with new balance
+    // Update card with new balance and transaction
     const updatedCard = {
       ...card,
       balance: newBalance,
@@ -153,7 +125,7 @@ export const ViewCardModal = ({
     setShowTopUp(false);
   };
 
-  const filteredTransactions = transactions.filter((transaction) =>
+  const filteredTransactions = (card.transactions || []).filter((transaction) =>
     transactionFilter === "all" ? true : transaction.type === transactionFilter
   );
 
@@ -170,7 +142,7 @@ export const ViewCardModal = ({
               <h3 className="text-lg font-medium text-gray-900">
                 {card.cardNumber}
               </h3>
-              <p className="text-sm text-gray-500">User ID: {card.userId}</p>
+              <p className="text-sm text-gray-500">User Name: {card.userId}</p>
             </div>
           </div>
 

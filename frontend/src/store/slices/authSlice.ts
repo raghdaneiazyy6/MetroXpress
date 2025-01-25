@@ -2,12 +2,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "../../services/api";
 import { AuthState } from "../../types/auth";
-import { mockLogin } from "../../services/mockApi";
+import { mockLogin } from "../../mocks/usersData";
+
+const token = localStorage.getItem("token");
+const user = localStorage.getItem("user");
 
 const initialState: AuthState = {
-  user: null,
-  token: localStorage.getItem("token"),
-  isAuthenticated: false,
+  user: user ? JSON.parse(user) : null,
+  token: token,
+  isAuthenticated: !!token && !!user,
   loading: false,
   error: null,
 };
@@ -21,6 +24,7 @@ export const login = createAsyncThunk(
     try {
       const response = await mockLogin(credentials);
       localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
       return response;
     } catch (error: any) {
       return rejectWithValue(error.message || "Login failed");
@@ -48,6 +52,7 @@ export const register = createAsyncThunk(
 
 export const logout = createAsyncThunk("auth/logout", async () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
 });
 
 const authSlice = createSlice({

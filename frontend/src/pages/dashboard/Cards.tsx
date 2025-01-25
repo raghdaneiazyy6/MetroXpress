@@ -22,43 +22,10 @@ import { format } from "date-fns";
 import { AddCardModal } from "../../components/cards/AddCardModal";
 import { ViewCardModal } from "../../components/cards/ViewCardModal";
 import { toast } from "react-hot-toast";
-
-// Sample data
-const sampleCards: Card[] = [
-  {
-    id: "1",
-    cardNumber: "6032-9174-8523-4561",
-    userId: "sarah_ahmed",
-    balance: 50.0,
-    status: "active",
-    issueDate: "2024-01-01",
-    expiryDate: "2025-01-01",
-    lastUsed: "2024-02-20",
-  },
-  {
-    id: "2",
-    cardNumber: "8145-7932-6541-2098",
-    userId: "mohamed_hassan",
-    balance: 0.0,
-    status: "blocked",
-    issueDate: "2023-11-15",
-    expiryDate: "2024-11-15",
-    lastUsed: "2024-02-01",
-  },
-  {
-    id: "3",
-    cardNumber: "4527-8916-3045-7829",
-    userId: "nour_ibrahim",
-    balance: 150.75,
-    status: "inactive",
-    issueDate: "2024-02-01",
-    expiryDate: "2025-02-01",
-    lastUsed: "2024-02-19",
-  },
-];
+import { mockCards } from "../../mocks/cardData";
 
 export const Cards = () => {
-  const [cards, setCards] = useState<Card[]>(sampleCards);
+  const [cards, setCards] = useState<Card[]>(mockCards);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<Card["status"] | "all">(
     "all"
@@ -79,23 +46,87 @@ export const Cards = () => {
     }
   };
 
-  const handleAddCard = (cardData: any) => {
-    const newCard: Card = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...cardData,
-      lastUsed: new Date().toISOString(),
-    };
-    setCards([newCard, ...cards]);
-    toast.success("Card added successfully");
+  const handleAddCard = (cardData: {
+    cardNumber: string;
+    userName: string;
+    expiryDate: string;
+    balance: number;
+  }) => {
+    try {
+      const newCard: Card = {
+        id: Math.random().toString(36).substr(2, 9),
+        cardNumber: cardData.cardNumber,
+        userId: cardData.userName.toLowerCase().replace(/\s+/g, "_"),
+        balance: cardData.balance,
+        status: "active",
+        issueDate: new Date().toISOString(),
+        expiryDate: cardData.expiryDate,
+        lastUsed: "",
+        transactions: [],
+      };
+
+      setCards((prevCards) => {
+        const updatedCard = checkCardStatus(newCard);
+        return [updatedCard, ...prevCards];
+      });
+
+      toast.success("Card added successfully");
+      setShowAddModal(false);
+    } catch (error) {
+      console.error("Error adding card:", error);
+      toast.error("Failed to add card");
+    }
+  };
+
+  const handleUpdateCard = (updatedCard: Card) => {
+    setCards(
+      cards.map((card) =>
+        card.id === updatedCard.id ? checkCardStatus(updatedCard) : card
+      )
+    );
   };
 
   const handleBlockCard = (cardId: string) => {
     setCards(
       cards.map((card) =>
-        card.id === cardId ? { ...card, status: "blocked" } : card
+        card.id === cardId
+          ? {
+              ...card,
+              status: card.status === "blocked" ? "active" : "blocked",
+              transactions: [
+                {
+                  id: Math.random().toString(36).substr(2, 9),
+                  cardId: card.id,
+                  amount: 0,
+                  type: "exit",
+                  station: "System",
+                  timestamp: new Date().toISOString(),
+                  status: "completed",
+                  balance: card.balance,
+                },
+                ...(card.transactions || []),
+              ],
+            }
+          : card
       )
     );
-    toast.success("Card blocked successfully");
+    toast.success(
+      `Card ${
+        cards.find((c) => c.id === cardId)?.status === "blocked"
+          ? "unblocked"
+          : "blocked"
+      } successfully`
+    );
+  };
+
+  const checkCardStatus = (card: Card): Card => {
+    if (card.balance < 20 && card.status !== "blocked") {
+      return {
+        ...card,
+        status: "inactive",
+      };
+    }
+    return card;
   };
 
   const handleViewCard = (card: Card) => {
@@ -108,7 +139,7 @@ export const Cards = () => {
       (card) =>
         (filterStatus === "all" || card.status === filterStatus) &&
         (card.cardNumber.includes(searchTerm) ||
-          card.userId.includes(searchTerm))
+          card.userId.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     .sort((a, b) => {
       const aValue = a[sortField];
@@ -118,33 +149,6 @@ export const Cards = () => {
         : String(bValue).localeCompare(String(aValue));
     });
 
-  const handleTopUp = (cardId: string, amount: number) => {
-    setCards(
-      cards.map((card) => {
-        if (card.id === cardId) {
-          return {
-            ...card,
-            balance: card.balance + amount,
-            transactions: [
-              {
-                id: Math.random().toString(36).substr(2, 9),
-                cardId: card.id,
-                amount: amount,
-                type: "topup",
-                station: "Online",
-                timestamp: new Date().toISOString(),
-                status: "completed",
-                balance: card.balance + amount,
-              },
-              ...(card.transactions || []),
-            ],
-          };
-        }
-        return card;
-      })
-    );
-  };
-
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -153,10 +157,7 @@ export const Cards = () => {
           <h1 className="text-2xl font-bold text-gray-900">RFID Cards</h1>
           <p className="text-gray-500">Manage all RFID cards in the system</p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>
-          <PlusIcon className="w-5 h-5 mr-2" />
-          Add New Card
-        </Button>
+        <Button onClick={() => setShowAddModal(true)}>Add New Card</Button>
       </div>
 
       {/* Filters and Search */}
@@ -241,14 +242,16 @@ export const Cards = () => {
                 <TableCell>
                   <div className="flex space-x-2">
                     <Button
-                      variant="outline"
+                      variant={
+                        card.status === "blocked" ? "primary" : "outline"
+                      }
                       size="sm"
                       onClick={() => {
                         setSelectedCard(card);
                         setShowConfirmBlock(true);
                       }}
                     >
-                      Block
+                      {card.status === "blocked" ? "Unblock" : "Block"}
                     </Button>
                     <Button
                       variant="outline"
@@ -266,11 +269,13 @@ export const Cards = () => {
       </CardComponent>
 
       {/* Modals */}
-      <AddCardModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddCard}
-      />
+      {showAddModal && ( // Only render when showAddModal is true
+        <AddCardModal
+          isOpen={showAddModal}
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddCard}
+        />
+      )}
 
       {selectedCard && (
         <ViewCardModal
@@ -280,6 +285,7 @@ export const Cards = () => {
             setSelectedCard(null);
           }}
           card={selectedCard}
+          onUpdate={handleUpdateCard}
         />
       )}
 
@@ -287,13 +293,20 @@ export const Cards = () => {
       <Modal
         isOpen={showConfirmBlock}
         onClose={() => setShowConfirmBlock(false)}
-        title="Block Card"
+        title={`${
+          selectedCard?.status === "blocked" ? "Unblock" : "Block"
+        } Card`}
       >
         <div className="space-y-4">
-          <p>Are you sure you want to block this card?</p>
+          <p>
+            Are you sure you want to{" "}
+            {selectedCard?.status === "blocked" ? "unblock" : "block"} this
+            card?
+          </p>
           <p className="text-sm text-gray-500">
-            This action cannot be undone. The card will be immediately blocked
-            from all transactions.
+            {selectedCard?.status === "blocked"
+              ? "This will allow the card to be used for transactions again."
+              : "This action will prevent the card from being used in any transactions."}
           </p>
           <div className="flex justify-end space-x-3">
             <Button
@@ -303,7 +316,9 @@ export const Cards = () => {
               Cancel
             </Button>
             <Button
-              variant="danger"
+              variant={
+                selectedCard?.status === "blocked" ? "primary" : "danger"
+              }
               onClick={() => {
                 if (selectedCard) {
                   handleBlockCard(selectedCard.id);
@@ -312,7 +327,7 @@ export const Cards = () => {
                 }
               }}
             >
-              Block Card
+              {selectedCard?.status === "blocked" ? "Unblock" : "Block"} Card
             </Button>
           </div>
         </div>

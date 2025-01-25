@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/Button";
 // src/pages/dashboard/Users.tsx
 export const Users = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
         <Button>Add New User</Button>

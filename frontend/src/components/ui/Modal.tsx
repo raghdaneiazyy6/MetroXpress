@@ -1,7 +1,6 @@
 // src/components/ui/Modal.tsx
-import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Fragment } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -37,18 +36,13 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title as="h3" className="text-lg font-medium">
-                    {title}
-                  </Dialog.Title>
-                  <button
-                    onClick={onClose}
-                    className="rounded-full p-1 hover:bg-gray-100"
-                  >
-                    <XMarkIcon className="h-5 w-5 text-gray-500" />
-                  </button>
-                </div>
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                >
+                  {title}
+                </Dialog.Title>
                 {children}
               </Dialog.Panel>
             </Transition.Child>

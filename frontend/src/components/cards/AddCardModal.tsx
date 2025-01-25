@@ -2,92 +2,147 @@
 import { useState } from "react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
+import { format, addYears } from "date-fns";
+import toast from "react-hot-toast";
 
 interface AddCardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (cardData: any) => void;
+  onAdd: (cardData: {
+    cardNumber: string;
+    userName: string;
+    expiryDate: string;
+    balance: number;
+  }) => void;
 }
 
 export const AddCardModal = ({ isOpen, onClose, onAdd }: AddCardModalProps) => {
-  const [formData, setFormData] = useState({
-    userId: "",
-    initialBalance: "0",
-    expiryDate: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onAdd({
-      ...formData,
-      initialBalance: parseFloat(formData.initialBalance),
-      cardNumber: generateCardNumber(),
-      status: "active",
-      issueDate: new Date().toISOString(),
-    });
-    onClose();
-  };
+  const [userName, setUserName] = useState("");
+  const [initialBalance, setInitialBalance] = useState("");
+  const defaultExpiryDate = format(addYears(new Date(), 1), "yyyy-MM-dd");
+  const [expiryDate, setExpiryDate] = useState(defaultExpiryDate);
 
   const generateCardNumber = () => {
-    return Array.from({ length: 4 }, () =>
-      Math.floor(Math.random() * 10000)
-        .toString()
-        .padStart(4, "0")
-    ).join("-");
+    const numbers = Array.from({ length: 16 }, () =>
+      Math.floor(Math.random() * 10)
+    );
+    return numbers
+      .join("")
+      .match(/.{1,4}/g)!
+      .join("-");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!userName || !initialBalance || !expiryDate) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      // Generate a random card number
+      const cardNumber = generateCardNumber();
+
+      onAdd({
+        cardNumber,
+        userName,
+        expiryDate,
+        balance: parseFloat(initialBalance),
+      });
+
+      // Reset form
+      setUserName("");
+      setInitialBalance("");
+      setExpiryDate(defaultExpiryDate);
+
+      // Close modal
+      onClose();
+    } catch (error) {
+      console.error("Error adding card:", error);
+      toast.error("Failed to add card");
+    }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Card">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            User ID
+            User Name
           </label>
           <input
             type="text"
-            required
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-            value={formData.userId}
-            onChange={(e) =>
-              setFormData({ ...formData, userId: e.target.value })
-            }
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Enter user name"
+            required
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Initial Balance
           </label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-            value={formData.initialBalance}
-            onChange={(e) =>
-              setFormData({ ...formData, initialBalance: e.target.value })
-            }
-          />
+          <div className="relative mt-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+              $
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              className="block w-full rounded-md border border-gray-300 pl-8 pr-3 py-2"
+              value={initialBalance}
+              onChange={(e) => setInitialBalance(e.target.value)}
+              placeholder="0.00"
+              required
+            />
+          </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Expiry Date
           </label>
           <input
             type="date"
-            required
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-            value={formData.expiryDate}
-            onChange={(e) =>
-              setFormData({ ...formData, expiryDate: e.target.value })
-            }
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            min={format(new Date(), "yyyy-MM-dd")}
+            required
           />
         </div>
-        <div className="flex justify-end space-x-3 mt-6">
-          <Button variant="outline" onClick={onClose}>
+
+        <div className="mt-2 text-sm text-gray-500">
+          <p>A card number will be automatically generated upon submission.</p>
+        </div>
+
+        <div className="flex justify-end space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              onClose();
+              setUserName("");
+              setInitialBalance("");
+              setExpiryDate(defaultExpiryDate);
+            }}
+          >
             Cancel
           </Button>
-          <Button type="submit">Add Card</Button>
+          <Button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }}
+          >
+            Add Card
+          </Button>
         </div>
       </form>
     </Modal>

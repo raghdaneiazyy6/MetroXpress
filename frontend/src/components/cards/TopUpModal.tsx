@@ -22,12 +22,16 @@ export const TopUpModal = ({
 }: TopUpModalProps) => {
   const [amount, setAmount] = useState<string>("");
   const [isCustomAmount, setIsCustomAmount] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("card"); // You can expand this later
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const numAmount = parseFloat(amount);
     if (numAmount > 0) {
       onTopUp(numAmount);
+      // Reset form
+      setAmount("");
+      setIsCustomAmount(false);
       onClose();
     }
   };
@@ -36,6 +40,8 @@ export const TopUpModal = ({
     setAmount(preset.toString());
     setIsCustomAmount(false);
   };
+
+  const newBalance = card.balance + (parseFloat(amount) || 0);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Top Up Card">
@@ -60,6 +66,7 @@ export const TopUpModal = ({
           {PRESET_AMOUNTS.map((preset) => (
             <button
               key={preset}
+              type="button"
               onClick={() => handlePresetAmount(preset)}
               className={`p-4 rounded-lg border-2 transition-colors ${
                 amount === preset.toString() && !isCustomAmount
@@ -80,6 +87,7 @@ export const TopUpModal = ({
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-gray-700">Custom Amount</p>
             <button
+              type="button"
               onClick={() => setIsCustomAmount(true)}
               className="text-sm text-primary-600 hover:text-primary-700"
             >
@@ -119,7 +127,7 @@ export const TopUpModal = ({
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Summary */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between">
@@ -128,14 +136,13 @@ export const TopUpModal = ({
             </div>
             <div className="flex justify-between mt-2">
               <p className="text-gray-500">New Balance</p>
-              <p className="font-medium">
-                ${((card.balance || 0) + parseFloat(amount || "0")).toFixed(2)}
-              </p>
+              <p className="font-medium">${newBalance.toFixed(2)}</p>
             </div>
           </div>
 
+          {/* Actions */}
           <div className="flex justify-end space-x-3">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" type="button" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={!amount || parseFloat(amount) <= 0}>
