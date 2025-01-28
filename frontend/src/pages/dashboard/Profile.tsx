@@ -1,8 +1,5 @@
 // src/pages/Profile.tsx
-import { useState, useRef } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { Card } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import {
   CameraIcon,
@@ -12,20 +9,52 @@ import {
   PencilIcon,
   PhoneIcon,
   UserCircleIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
+import { Button } from "../../components/ui/Button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/Table";
+import { AddCardModal } from "../../components/cards/AddCardModal";
+import { format } from "date-fns";
+import { Card } from "../../components/ui/Card";
+
+const stationMap: { [key: number]: string } = {
+  0: "Monib",
+  1: "Mekky",
+  2: "Om Masryen",
+  3: "Giza",
+  4: "Faisal",
+  5: "Cairouni",
+  6: "Behos",
+  7: "Dokki",
+  8: "Opera",
+  9: "Sadat",
+  10: "Naguib",
+};
 
 export const Profile = () => {
-  const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    location: user?.location || "",
-    bio: user?.bio || "",
+  const [cards, setCards] = useState<any[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(true);
+  
+  const [profileData, setProfileData] = useState({
+    fullName: "",
+    email: "",
   });
+
+  const [showAddCardModal, setShowAddCardModal] = useState(false);
+
+  // Add new state for transactions
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
 
   const handleProfilePictureChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -38,10 +67,7 @@ export const Profile = () => {
         const reader = new FileReader();
         reader.onloadend = async () => {
           try {
-            await updateProfile({
-              ...user,
-              profilePicture: reader.result as string,
-            });
+            // TODO: Implement profile picture update logic
             toast.success("Profile picture updated successfully");
           } catch (error) {
             console.error("Update error:", error);
@@ -63,21 +89,26 @@ export const Profile = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const result = await updateProfile({ ...user, ...formData });
-
-      // Check if the update was successful
-      if (result.type === "auth/updateProfile/fulfilled") {
-        toast.success("Profile updated successfully");
-        setIsEditing(false);
-      } else {
-        throw new Error("Update failed");
-      }
+      // TODO: Implement profile update logic
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddCard = (cardData: {
+    cardNumber: string;
+    userName: string;
+    expiryDate: string;
+    balance: number;
+  }) => {
+    // TODO: Implement card addition logic
+    toast.success("Card added successfully");
+    setShowAddCardModal(false);
   };
 
   const inputClasses =
@@ -88,6 +119,85 @@ export const Profile = () => {
   const textClasses =
     "mt-1 text-sm text-gray-900 dark:text-white flex items-center";
 
+  // Modify useEffect to remove auth token requirement
+  useEffect(() => {
+    const fetchCards = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3000/home/cards/user/cards', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch cards');
+            }
+            const data = await response.json();
+            setCards(data);
+        } catch (error) {
+            console.error('Error fetching cards:', error);
+            toast.error('Failed to load RFID cards');
+        } finally {
+            setCardsLoading(false);
+        }
+    };
+
+    fetchCards();
+  }, []);
+
+  // Add useEffect to fetch profile data when component mounts
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/profile/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile data');
+        }
+        const data = await response.json();
+        setProfileData({
+          fullName: data.fullName,
+          email: data.email,
+        });
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast.error('Failed to load profile information');
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  // Add useEffect to fetch transactions
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3000/finances/transactions', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch transactions');
+        }
+        const data = await response.json();
+        setTransactions(data.slice(0, 5)); // Only show latest 5 transactions
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        toast.error('Failed to load recent activity');
+      } finally {
+        setTransactionsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
@@ -96,206 +206,158 @@ export const Profile = () => {
             Profile
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Manage your personal information
+            Your personal information
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setIsEditing(!isEditing)}
-          disabled={loading}
-          className="flex flex-row-reverse items-center"
-        >
-          {isEditing ? "Cancel" : "Edit Profile"}
-          <PencilIcon className="h-4 w-4 mr-2" />
-        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Picture Section */}
-        <Card className="p-6 lg:col-span-1">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                {user?.profilePicture ? (
-                  <img
-                    src={user.profilePicture}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <UserCircleIcon className="w-full h-full text-gray-400 dark:text-gray-600" />
-                )}
-              </div>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 p-2 bg-white dark:bg-dark-bg-secondary rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
-              >
-                <CameraIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleProfilePictureChange}
-              />
-            </div>
-            <div className="text-center">
-              <h3 className="font-medium text-gray-900 dark:text-white">
-                {user?.name}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {user?.role}
-              </p>
-            </div>
-          </div>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* Profile Information */}
-        <Card className="p-6 lg:col-span-2">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <Card className="p-6">
+          <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Full Name */}
-              <div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                 <label className={labelClasses}>
                   <UserCircleIcon className={iconClasses} />
                   Full Name
                 </label>
-                {isEditing ? (
-                  <div className="mt-1 relative">
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      className={inputClasses}
-                    />
-                    <UserCircleIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                  </div>
-                ) : (
-                  <p className={textClasses}>{user?.name}</p>
-                )}
+                <p className="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+                  {profileData.fullName || "Not provided"}
+                </p>
               </div>
 
               {/* Email */}
-              <div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                 <label className={labelClasses}>
                   <EnvelopeIcon className={iconClasses} />
                   Email
                 </label>
-                <div className="mt-1 relative">
-                  <input
-                    type="email"
-                    value={user?.email}
-                    readOnly
-                    className={`${inputClasses} cursor-not-allowed bg-gray-50 dark:bg-dark-bg-tertiary`}
-                  />
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                </div>
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label className={labelClasses}>
-                  <PhoneIcon className={iconClasses} />
-                  Phone Number
-                </label>
-                {isEditing ? (
-                  <div className="mt-1 relative">
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      className={inputClasses}
-                    />
-                    <PhoneIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                  </div>
-                ) : (
-                  <p className={textClasses}>{user?.phone || "Not provided"}</p>
-                )}
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className={labelClasses}>
-                  <MapPinIcon className={iconClasses} />
-                  Location
-                </label>
-                {isEditing ? (
-                  <div className="mt-1 relative">
-                    <input
-                      type="text"
-                      value={formData.location}
-                      onChange={(e) =>
-                        setFormData({ ...formData, location: e.target.value })
-                      }
-                      className={inputClasses}
-                    />
-                    <MapPinIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                  </div>
-                ) : (
-                  <p className={textClasses}>
-                    {user?.location || "Not provided"}
-                  </p>
-                )}
+                <p className="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+                  {profileData.email || "Not provided"}
+                </p>
               </div>
             </div>
+          </div>
+        </Card>
 
-            {/* Bio */}
-            <div>
-              <label className={labelClasses}>
-                <DocumentTextIcon className={iconClasses} />
-                Bio
-              </label>
-              {isEditing ? (
-                <div className="mt-1 relative">
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bio: e.target.value })
-                    }
-                    rows={4}
-                    className={inputClasses}
-                  />
-                  <DocumentTextIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 absolute left-3 top-3" />
-                </div>
-              ) : (
-                <p className={textClasses}>{user?.bio || "No bio provided"}</p>
-              )}
-            </div>
-
-            {isEditing && (
-              <div className="flex justify-end space-x-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            )}
-          </form>
+        {/* Cards Section */}
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-medium text-gray-900 dark:text-white">
+              Your RFID Cards
+            </h3>
+            <Button
+              onClick={() => setShowAddCardModal(true)}
+              className="flex items-center"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add New Card
+            </Button>
+          </div>
+          <div className="space-y-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="dark:text-primary-400">Card Number</TableHead>
+                  <TableHead className="dark:text-primary-400">Balance</TableHead>
+                  <TableHead className="dark:text-primary-400">Status</TableHead>
+                  <TableHead className="dark:text-primary-400">Expiry Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {cardsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">
+                      Loading cards...
+                    </TableCell>
+                  </TableRow>
+                ) : cards.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-gray-500">
+                      No cards found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  cards.map((card) => (
+                    <TableRow key={card.cardId}>
+                      <TableCell>{card.cardId}</TableCell>
+                      <TableCell>${card.balance.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            card.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {card.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {card.expiryDate ? format(new Date(card.expiryDate), "MMM dd, yyyy") : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </Card>
 
         {/* Activity Section */}
-        <Card className="p-6 lg:col-span-3">
+        <Card className="p-6">
           <h3 className="font-medium text-gray-900 dark:text-white mb-4">
             Recent Activity
           </h3>
           <div className="space-y-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No recent activity
-            </p>
+            {transactionsLoading ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Loading activity...
+              </p>
+            ) : transactions.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No recent activity
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {transactions.map((transaction) => (
+                  <div 
+                    key={transaction._id} 
+                    className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {transaction.type === 'entry' ? 'Entry at ' : 'Exit from '} 
+                        {stationMap[transaction.station] || transaction.station}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {format(new Date(transaction.date), "MMM dd, yyyy 'at' HH:mm")}
+                      </p>
+                    </div>
+                    <span className={`text-sm font-medium ${
+                      transaction.type === 'entry' 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : 'text-green-600 dark:text-green-400'
+                    }`}>
+                      {transaction.type === 'entry' ? '-' : '+'}${transaction.amount.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Card>
       </div>
+
+      {/* Add Card Modal */}
+      {showAddCardModal && (
+        <AddCardModal
+          isOpen={showAddCardModal}
+          onClose={() => setShowAddCardModal(false)}
+          onAdd={handleAddCard}
+        />
+      )}
     </div>
   );
 };

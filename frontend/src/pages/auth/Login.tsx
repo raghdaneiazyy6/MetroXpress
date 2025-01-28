@@ -18,18 +18,45 @@ export const Login = () => {
     email: "",
     password: "",
   });
+  const [loadingState, setLoading] = useState(false);
+  const [errorState, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Attempting login with:", { email: formData.email, password: "***" });
 
     try {
-      const result = await login(formData).unwrap();
-      console.log("Login successful:", result);
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/home/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Store both token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify({
+        fullName: data.fullName,
+        email: data.email
+      }));
+      
+      console.log("Login successful - navigating to profile");
       toast.success("Welcome back!");
-      navigate("/dashboard");
+      navigate("/profile");
     } catch (error) {
-      console.error("Login failed:", error);
-      toast.error("Invalid credentials");
+      console.error("Login error details:", error);
+      setError(error instanceof Error ? error.message : "Invalid credentials");
+      toast.error(error instanceof Error ? error.message : "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,7 +71,6 @@ export const Login = () => {
         className="relative z-10 bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4"
       >
         <div className="text-center mb-8">
-          {/* You can add your logo here */}
           <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-10 h-10 text-primary-600" />
           </div>
@@ -54,14 +80,14 @@ export const Login = () => {
           <p className="text-gray-500 ">Sign in to your account to continue</p>
         </div>
 
-        {error && (
+        {errorState && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 p-4 bg-red-50 rounded-lg flex items-center text-red-600"
           >
             <ExclamationCircleIcon className="w-5 h-5 mr-2" />
-            <span className="text-sm">{error}</span>
+            <span className="text-sm">{errorState}</span>
           </motion.div>
         )}
 
@@ -139,24 +165,15 @@ export const Login = () => {
                 Remember me
               </label>
             </div>
-
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-primary-600 hover:text-primary-500"
-              >
-                Forgot password?
-              </a>
-            </div>
           </div>
 
           <div>
             <Button
               type="submit"
               className="w-full py-3 bg-primary-600 hover:bg-primary-700 transition-colors"
-              disabled={loading}
+              disabled={loadingState}
             >
-              {loading ? (
+              {loadingState ? (
                 <div className="flex items-center justify-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -186,32 +203,6 @@ export const Login = () => {
             </Button>
           </div>
         </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500 dark:text-gray-400">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50">
-              <span className="sr-only">Sign in with Google</span>
-              {/* Add Google icon */}
-              Google
-            </button>
-            <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50">
-              <span className="sr-only">Sign in with GitHub</span>
-              {/* Add GitHub icon */}
-              GitHub
-            </button>
-          </div>
-        </div>
 
         <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-300">
           Don't have an account?{" "}

@@ -60,11 +60,7 @@ export const Dashboard = () => {
       {/* Welcome Section */}
       <Card className="p-4">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Welcome back,{" "}
-          <span className="text-primary-800 dark:text-primary-400">
-            {user?.name || "User"}
-          </span>
-          !
+          Welcome back!
         </h1>
         <p className="text-sm  dark:text-gray-400">
           Here's what's happening with your transport system today.

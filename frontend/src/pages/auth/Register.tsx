@@ -33,14 +33,42 @@ export const Register = () => {
 
     try {
       setLoading(true);
-      // TODO: Implement registration logic
-      console.log("Register attempt with:", formData);
+      const response = await fetch("http://localhost:3000/home/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse response:', responseText);
+        throw new Error('Invalid response from server');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
+      // Store the token in localStorage
+      localStorage.setItem("token", data.token);
+      
       toast.success("Account created successfully!");
       navigate("/login");
     } catch (error) {
       console.error("Registration failed:", error);
-      toast.error("Registration failed");
-      setError("Failed to create account");
+      setError(error instanceof Error ? error.message : "Failed to create account");
     } finally {
       setLoading(false);
     }
@@ -236,30 +264,6 @@ export const Register = () => {
             </Button>
           </div>
         </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500 dark:text-gray-400">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500  dark:text-gray-400 hover:bg-gray-50">
-              <span className="sr-only">Sign up with Google</span>
-              Google
-            </button>
-            <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500  dark:text-gray-400 hover:bg-gray-50">
-              <span className="sr-only">Sign up with GitHub</span>
-              GitHub
-            </button>
-          </div>
-        </div>
 
         <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-300">
           Already have an account?{" "}
